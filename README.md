@@ -11,11 +11,13 @@ Restricted SSH server which allows SCP / SFTP access only.
 
 1) Put your authorized keys in an ENV variable and run the image:
 
+Use the `AUTHORIZED_KEYS_BASE64` or `AUTHORIZED_KEYS` environment variable to specify the authorized keys for the `data` user. The value should be a base64-encoded string of the `authorized_keys` file.
+
     ```bash
-    AUTHORIZED_KEYS=$(base64 -w0 my-authorized-keys)
+    AUTHORIZED_KEYS_BASE64=$(base64 -w0 my-authorized-keys)
 
     docker run -d \
-      -e AUTHORIZED_KEYS=$AUTHORIZED_KEYS \
+      -e AUTHORIZED_KEYS_BASE64=$AUTHORIZED_KEYS_BASE64 \
       -p <PORT>:22 \
       -v <DATADIR>:/home/data \
       -v <HOSTKEYDIR>:/var/local/etc/ssh \
