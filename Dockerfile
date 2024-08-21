@@ -2,8 +2,8 @@ FROM alpine:3.20
 
 RUN apk add --no-cache bash rssh
 
-RUN echo -e "muchtooeasytoguess\nmuchtooeasytoguess\n" | adduser -u 1000 -h /home/data -s /usr/bin/rssh data \
-    echo -e "PasswordAuthentication no\n" >>/etc/ssh/sshd_config \
+RUN echo -e "muchtooeasytoguess\nmuchtooeasytoguess\n" | adduser -u 1000 -h /home/data -s /usr/bin/rssh data && \
+    echo -e "PasswordAuthentication no\n" >>/etc/ssh/sshd_config && \
     echo -e "allowscp\nallowsftp\n" >> /etc/rssh.conf
 
 ENV AUTHORIZED_KEYS_FILE /authorized_keys
