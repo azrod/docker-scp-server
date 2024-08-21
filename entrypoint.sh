@@ -11,9 +11,12 @@ HOST_KEYS_DIR="$HOST_KEYS_DIR_PREFIX/etc/ssh"
 mkdir -p "$HOST_KEYS_DIR"
 ssh-keygen -A -f "$HOST_KEYS_DIR_PREFIX"
 
-if [[ -n "${AUTHORIZED_KEYS:-}" ]]; then
+if [[ -n "${AUTHORIZED_KEYS_BASE64:-}" ]]; then
   # Copy authorized keys from ENV variable
-  echo "$AUTHORIZED_KEYS" | base64 -d >>"$AUTHORIZED_KEYS_FILE"
+  echo "$AUTHORIZED_KEYS_BASE64" | base64 -d >>"$AUTHORIZED_KEYS_FILE"
+elif [[ -n "${AUTHORIZED_KEYS:-}" ]]; then
+  # Copy authorized keys from ENV variable
+  echo "$AUTHORIZED_KEYS" >>"$AUTHORIZED_KEYS_FILE"
 elif [[ -f "$SECRETS_FILE" ]]; then
   cp "$SECRETS_FILE" "$AUTHORIZED_KEYS_FILE"
 else

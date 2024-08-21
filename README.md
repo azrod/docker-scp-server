@@ -11,7 +11,7 @@ Restricted SSH server which allows SCP / SFTP access only.
 
 1) Put your authorized keys in an ENV variable and run the image:
 
-Use the `AUTHORIZED_KEYS_BASE64` or `AUTHORIZED_KEYS` environment variable to specify the authorized keys for the `data` user. The value should be a base64-encoded string of the `authorized_keys` file.
+Use the `AUTHORIZED_KEYS_BASE64` or `AUTHORIZED_KEYS_BASE64` environment variable to specify the authorized keys for the `data` user. The value should be a base64-encoded string of the `authorized_keys` file.
 
     ```bash
     AUTHORIZED_KEYS_BASE64=$(base64 -w0 my-authorized-keys)
