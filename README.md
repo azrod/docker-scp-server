@@ -1,5 +1,10 @@
 # docker-scp-server
 
+This is a mainly unmodified fork of [schoolscout/scp-server](https://github.com/schoolscout/scp-server) with the following changes:
+
+- Update alpine base image to 3.20
+- Add GithubAction to build and push the image to ghcr.io
+
 Restricted SSH server which allows SCP / SFTP access only.
 
 ## Running
@@ -14,7 +19,7 @@ Restricted SSH server which allows SCP / SFTP access only.
       -p <PORT>:22 \
       -v <DATADIR>:/home/data \
       -v <HOSTKEYDIR>:/var/local/etc/ssh \
-      schoolscout/scp-server
+      ghcr.io/azrod/docker-scp-server
     ```
 
     Alternatively, mount your `authorized_keys` file into the container at `/run/secrets/authorized_keys`:
@@ -25,7 +30,7 @@ Restricted SSH server which allows SCP / SFTP access only.
       -p <PORT>:22 \
       -v <DATADIR>:/home/data \
       -v <HOSTKEYDIR>:/var/local/etc/ssh \
-      schoolscout/scp-server
+      ghcr.io/azrod/docker-scp-server
     ```
 
 2) Now you can copy into the container (e.g. via scp) as the `data` user:

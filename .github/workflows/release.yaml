@@ -1,0 +1,84 @@
+name: TagRelease
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Tag version number (Eg: v0.1.0)'
+        required: true
+        type: string
+
+permissions:
+  contents: write
+  packages: write
+
+jobs:
+  # * Step 0: Pre-Check
+  pre-check:
+    runs-on: ubuntu-latest
+    outputs:
+      TAG_NAME: ${{ steps.set-tag.outputs.TAG_NAME }}
+      PRERELEASE: ${{ steps.set-tag.outputs.PRERELEASE }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      # ! TODO add check if tag format is valid (semver)
+      - name: Check if tag is valid
+        run : |
+          # Check if the tag start with 'v', if not, add it
+          if [[ ! ${{ github.event.inputs.tag }} =~ ^v.* ]]; then
+            echo "Error tag format is invalid. The format is vx.x.x" >> "$GITHUB_OUTPUT"
+            exit 1
+          fi
+      - name: Construct Tag for Pre-Release
+        id: set-tag
+        run: |
+          # Construct the tag name
+          echo "TAG_NAME=${{ github.event.inputs.tag }}" >> "$GITHUB_OUTPUT"
+  # * Step 1: Check if everything is ok
+  tag-already-exist:
+    needs: [pre-check]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Check if tag not already exists
+        run: |
+          if git rev-parse ${{ needs.pre-check.outputs.TAG_NAME }} >/dev/null 2>&1; then
+            echo "Tag ${{ needs.pre-check.outputs.TAG_NAME }} already exists" >> "$GITHUB_OUTPUT"
+            exit 1
+          fi
+  # * Step 2: Create a new tag
+  tag:
+    needs: [pre-check, tag-already-exist]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: rickstaa/action-create-tag@v1
+        id: "tag_create"
+        with:
+          tag: ${{ needs.pre-check.outputs.TAG_NAME }}
+          tag_exists_error: true
+          message: ${{ needs.pre-check.outputs.TAG_NAME }}
+  build:
+    needs: [pre-check,tag]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+      
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+      
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Build and push
+        uses: docker/build-push-action@v6
+        with:
+          platforms: linux/amd64,linux/arm64
+          push: true
+          tags: ghcr.io/${{ github.actor }}/docker-scp-server:latest,ghcr.io/${{ github.actor }}/docker-scp-server:${{ needs.pre-check.outputs.TAG_NAME }}
